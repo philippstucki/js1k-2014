@@ -4,7 +4,7 @@
 a = document.getElementById('c');
 c = a.getContext('2d');
 // declare global vars to enable shortening by google closure compiler
-var pixelSize = 5,
+var pixelSize = 2,
     PI = Math.PI,
     w=a.width,
     vw=w/pixelSize|0,
@@ -31,19 +31,25 @@ c.fillStyle = 'black';
 t = fps = 0;
 st = new Date().getTime();
 
-function pp(x, y, b) {
-    c.fillStyle = 'rgb(0,'+(b==-1?0:b)+',0)';
+function pp(x, y, h, d) {
+    var fg=15;
+    b=d>fg?(Math.exp(-(d-fg)*fg*1e-2)*h)|0:h;
+    c.fillStyle = 'rgb(0,'+(h==-1?0:b)+',0)';
     c.fillRect(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
 }
 
 render = function(t, fps) {
-    var f=1,imin=0.1;imax=25,di=0.2;
-    var x,y,d,b;
-    var o={x:0,y:4+1*Math.sin(t*.1)+0.2*Math.sin(t*0.4),z:-15+t/10}
+    var f=1,imin=0.1;imax=30,di=0.45;
+    var x,y,d,b,fy=0,qd=8,qs=4,qh;
+    var o={
+        x:8,
+        y:4,
+        z:2+t/10
+    }
 
     for (y = 0; y < vh; y+=1) {
         for (x = 0; x < vw; x+=1) {
-            d={x:x/vw-0.5,y:y/vh-0.9,z:f};
+            d={x:x/vw-0.5,y:y/vh-0.8,z:f};
             b=-1;
 
 
@@ -53,11 +59,15 @@ render = function(t, fps) {
                     y:o.y+i*d.y,
                     z:o.z+i*d.z,
                 }
-                var fy = 5*Math.sin(0.1*p.x)*Math.sin(0.1*p.z);
-                fy += 0.2*Math.sin(5*p.x)*Math.sin(4*p.z);
+
+                ct = t/30;
+                fy = Math.sin(p.x);
+                fy *= Math.cos(p.z);
+                fy = (fy+2)/3;
+
 
                 if (p.y < fy) {
-                    b=(fy+1)/2*250|0;
+                    b=fy*250|0;
                     break;
                 }
             }
