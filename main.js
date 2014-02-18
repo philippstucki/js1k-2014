@@ -4,7 +4,7 @@
 a = document.getElementById('c');
 c = a.getContext('2d');
 // declare global vars to enable shortening by google closure compiler
-var pixelSize = 2,
+var pixelSize = 4,
     PI = Math.PI,
     w=a.width,
     vw=w/pixelSize|0,
@@ -32,24 +32,24 @@ t = fps = 0;
 st = new Date().getTime();
 
 function pp(x, y, h, d) {
-    var fg=15;
+    var fg=35;
     b=d>fg?(Math.exp(-(d-fg)*fg*1e-2)*h)|0:h;
     c.fillStyle = 'rgb(0,'+(h==-1?0:b)+',0)';
     c.fillRect(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
 }
 
 render = function(t, fps) {
-    var f=1,imin=0.1;imax=30,di=0.45;
+    var f=1,imin=0.1;imax=40,di=0.2;
     var x,y,d,b,fy=0,qd=8,qs=4,qh;
     var o={
         x:8,
-        y:4,
-        z:2+t/10
+        y:4+0.5*Math.sin(t/4)+2*Math.sin(t/100),
+        z:-2+t/10
     }
 
     for (y = 0; y < vh; y+=1) {
         for (x = 0; x < vw; x+=1) {
-            d={x:x/vw-0.5,y:y/vh-0.8,z:f};
+            d={x:x/vw-(1+Math.sin(t/40))*0.5,y:y/vh-0.8,z:f};
             b=-1;
 
 
@@ -61,13 +61,16 @@ render = function(t, fps) {
                 }
 
                 ct = t/30;
-                fy = Math.sin(p.x);
-                fy *= Math.cos(p.z);
-                fy = (fy+2)/3;
+                fy = Math.sin(1.5*p.x/2)
+                * Math.cos(1.5*p.z/2)
+                * Math.sin(1+p.x/3)
+                * Math.sin(0.5+p.z/6);
+
+                fy = (fy+1)/2;
 
 
                 if (p.y < fy) {
-                    b=fy*250|0;
+                    b=fy*200|0;
                     break;
                 }
             }
@@ -83,7 +86,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 (function loop() {
-    requestAnimFrame(loop);
+    //requestAnimFrame(loop);
     // only render when running
     if (run==1) {
         render(t++, fps);
