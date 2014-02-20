@@ -18,7 +18,7 @@ var pixelSize = 8,
     t,
     st,
     run=1,
-    ts=16+1,
+    ts=256+1,
     hm=[],
     mr=Math.random,
     ms=Math.sin
@@ -54,25 +54,13 @@ function terrainstep(x, y, size, i) {
         cl=tl+(size-1)/2*(size+ofs),
         cr=cl+size-1,
         cm=cl+(size-1)/2,
-        vt,vb,vl,vr,
-        test,
         norm=function(v){v+=(mr()-0.5)/(Math.pow(2,i));return v>1?1:v<0?0:v;}
 
     hm[cm]=norm((hm[tl]+hm[tr]+hm[bl]+hm[br])/4); // center
-
-    // top
-    vt=hm[tl]+hm[tr]+hm[cm];
-    hm[t]=norm(y-size>0?(vt)/4:vt/3);
-
-    // bottom
-    hm[b]=norm(hm[bl]+hm[br]+hm[cm]/3);
-
-    //center left
-    vl=hm[tl]+hm[bl]+hm[cm];
-    hm[cl]=norm(x-size>0?(vl)/4:vl/3);
-
-    //center right
-    hm[cr]=norm((hm[tr]+hm[br]+hm[cm])/3);
+    hm[t]=norm((hm[tl]+hm[tr]+hm[cm])/3); // top
+    hm[b]=norm((hm[bl]+hm[br]+hm[cm])/3); // bottom
+    hm[cl]=norm((hm[tl]+hm[bl]+hm[cm])/3); //center left
+    hm[cr]=norm((hm[tr]+hm[br]+hm[cm])/3); //center right
 
     if (size>3) {
         terrainstep(x,y,(size-1)/2+1,i+1);
@@ -85,7 +73,7 @@ terrainstep(0,0,ts,0);
 plotHm();
 
 function plotHm() {
-    var ps=Math.max(10-Math.log(ts-1)/Math.LN2,1);
+    var ps=10-Math.log(ts-1)/Math.LN2;
     for(y=0;y<ts;y++) {
         for(x=0;x<ts;x++) {
             pp(x,y,200,2);
