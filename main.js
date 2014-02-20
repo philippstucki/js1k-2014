@@ -18,7 +18,7 @@ var pixelSize = 8,
     t,
     st,
     run=1,
-    ts=8+1,
+    ts=16+1,
     hm=[],
     mr=Math.random,
     ms=Math.sin
@@ -44,36 +44,48 @@ hm[0]=hm[ts-1]=hm[ts*ts-ts]=hm[ts*ts-1]=0.5;
 
 function terrainstep(x, y, size, i) {
     var bi = y*ts+x,
-        ofs = (Math.pow(2,i)-1)*size,
+        ofs = (Math.pow(2,i)-1)*(size-1),
         tl=bi,
         tr=bi+size-1,
         bl=bi+size*(size-1)+ofs*(size-1),
         br=bl+size-1,
-        t=tl+size/2-1,
-        b=bl+size/2-1,
-        cl=tl+(size+ofs)*(size-size/2-1),
+        t=tl+(size-1)/2,
+        b=bl+(size-1)/2,
+        cl=tl+(size-1)/2*(size+ofs),
         cr=cl+size-1,
-        cm=cl+size/2-1,
+        cm=cl+(size-1)/2,
+        vt,vb,vl,vr,
+        test,
         norm=function(v){v+=(mr()-0.5)/(Math.pow(2,i));return v>1?1:v<0?0:v;}
 
-    hm[cm]=hm[cm+1]=hm[cm+ts]=hm[cm+ts+1]=norm((hm[tl]+hm[tr]+hm[bl]+hm[br])/4); // center
-    hm[t]=hm[t+1]=norm((hm[tl]+hm[tr])/2); // top
-    hm[b]=hm[b+1]=norm((hm[bl]+hm[br])/2); // bottom
-    hm[cl]=hm[cl+ts]=norm((hm[tl]+hm[bl])/2); //center left
-    hm[cr]=hm[cr+ts]=norm((hm[tr]+hm[br])/2); //center right
+    hm[cm]=norm((hm[tl]+hm[tr]+hm[bl]+hm[br])/4); // center
 
-    if (size>4) {
-        terrainstep(x,y,size/2,i+1);
-        terrainstep(x+size/2,y,size/2,i+1);
-        terrainstep(x,y+size/2,size/2,i+1);
-        terrainstep(x+size/2,y+size/2,size/2,i+1);
+    // top
+    vt=hm[tl]+hm[tr]+hm[cm];
+    hm[t]=norm(y-size>0?(vt)/4:vt/3);
+
+    // bottom
+    hm[b]=norm(hm[bl]+hm[br]+hm[cm]/3);
+
+    //center left
+    vl=hm[tl]+hm[bl]+hm[cm];
+    hm[cl]=norm(x-size>0?(vl)/4:vl/3);
+
+    //center right
+    hm[cr]=norm((hm[tr]+hm[br]+hm[cm])/3);
+
+    if (size>3) {
+        terrainstep(x,y,(size-1)/2+1,i+1);
+        terrainstep(x+(size-1)/2,y,(size-1)/2+1,i+1);
+        terrainstep(x,y+(size-1)/2,(size-1)/2+1,i+1);
+        terrainstep(x+(size-1)/2,y+(size-1)/2,(size-1)/2+1,i+1);
     }
 }
 terrainstep(0,0,ts,0);
 plotHm();
 
 function plotHm() {
-    var ps=40-Math.log(ts)/Math.LN2;
+    var ps=Math.max(10-Math.log(ts-1)/Math.LN2,1);
     for(y=0;y<ts;y++) {
         for(x=0;x<ts;x++) {
             pp(x,y,200,2);
