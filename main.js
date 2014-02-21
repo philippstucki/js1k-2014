@@ -1,9 +1,6 @@
 // make jslint stop after the first error so we can do all sort of nasty tricks
 /*jslint passfail: true*/
 
-a = document.getElementById('c');
-c = a.getContext('2d');
-
 hme = document.getElementById('hm');
 hmc = hme.getContext('2d');
 
@@ -18,91 +15,103 @@ var pixelSize = 8,
     t,
     st,
     run=1,
-    ts=256+1,
+    ts=512,
+    ts_2=ts*ts;
+    t_persistence=1/8,
+    t_octaves=4,
+    t_scale=20,
+    t_amplify=1.2,
+    noise=[],
     hm=[],
     mr=Math.random,
-    ms=Math.sin
+    ms=Math.sin,
+    mp=Math.pow
     ;
-
-// shim layer with setTimeout fallback
-window.requestAnimFrame = (function(){
-  return  window.requestAnimationFrame       ||
-          window.webkitRequestAnimationFrame ||
-          window.mozRequestAnimationFrame    ||
-          function( callback ){
-            window.setTimeout(callback, 1000 / 60);
-          };
-})();
 
 c.fillStyle = 'black';
 
 t = fps = 0;
 st = new Date().getTime();
 
-// seed corners
-hm[0]=hm[ts-1]=hm[ts*ts-ts]=hm[ts*ts-1]=0.5;
+// generate heightmap
+function mod_ts_2(n) {
+    return ((n%ts_2)+ts_2)%ts_2;
+}
+function smooth(x,y) {
+    var bi=(y%ts)*ts+x%ts;
+    return noise[bi] + noise[mod_ts_2(bi-ts)] + noise[mod_ts_2(bi-ts-1)] + noise[(y%ts)*ts+(((x-1)%ts)+ts)%ts];
+}
+function interpolate(a, b, x) {
+    return a*(1-x)+b*x;
+}
+function interpolated_noise(x,y) {
+    var fx=x%1,
+        fy=y%1,
+        x=~~x,
+        y=~~y,
+        v1,v2,v3,v4,i1,i2;
+    v1=smooth(x,y);
+    v2=smooth(x+1,y);
+    v3=smooth(x,y+1);
+    v4=smooth(x+1,y+1);
+    i1=interpolate(v1,v2,fx);
+    i2=interpolate(v3,v4,fx);
+    return interpolate(i1,i2,fy);
+}
+function pnoise(x, y) {
+    var total=0,
+        p = t_persistence, // persistence
+        n = t_octaves - 1, // octaves
+        f, a;
 
-function terrainstep(x, y, size, i) {
-    var bi = y*ts+x,
-        ofs = (Math.pow(2,i)-1)*(size-1),
-        tl=bi,
-        tr=bi+size-1,
-        bl=bi+size*(size-1)+ofs*(size-1),
-        br=bl+size-1,
-        t=tl+(size-1)/2,
-        b=bl+(size-1)/2,
-        cl=tl+(size-1)/2*(size+ofs),
-        cr=cl+size-1,
-        cm=cl+(size-1)/2,
-        norm=function(v){v+=(mr()-0.5)/(Math.pow(2,i));return v>1?1:v<0?0:v;}
+    for (i=0;i<=n;i++) {
+        f=mp(2,i);
+        a=mp(p,i);
+        total+=interpolated_noise(x*f,y*f)*a;
+    }
+    return total/t_octaves*t_amplify;
+}
 
-    hm[cm]=norm((hm[tl]+hm[tr]+hm[bl]+hm[br])/4); // center
-    hm[t]=norm((hm[tl]+hm[tr]+hm[cm])/3); // top
-    hm[b]=norm((hm[bl]+hm[br]+hm[cm])/3); // bottom
-    hm[cl]=norm((hm[tl]+hm[bl]+hm[cm])/3); //center left
-    hm[cr]=norm((hm[tr]+hm[br]+hm[cm])/3); //center right
-
-    if (size>3) {
-        terrainstep(x,y,(size-1)/2+1,i+1);
-        terrainstep(x+(size-1)/2,y,(size-1)/2+1,i+1);
-        terrainstep(x,y+(size-1)/2,(size-1)/2+1,i+1);
-        terrainstep(x+(size-1)/2,y+(size-1)/2,(size-1)/2+1,i+1);
+for (i=0;i<ts*ts;i++) {
+    noise[i]=mr();
+}
+for (y = 0; y < ts; y+=1) {
+    for (x = 0; x < ts; x+=1) {
+        hm[y*ts+x]=pnoise(x/t_scale,y/t_scale);
     }
 }
-terrainstep(0,0,ts,0);
+
 plotHm();
 
 function plotHm() {
-    var ps=10-Math.log(ts-1)/Math.LN2;
+    var ps=Math.max(10-Math.log(ts-1)/Math.LN2|0,1);
     for(y=0;y<ts;y++) {
         for(x=0;x<ts;x++) {
-            pp(x,y,200,2);
             hmc.fillStyle = 'rgb(0,'+(hm[y*ts+x]*250|0)+',0)';
             hmc.fillRect(x*ps, y*ps, ps, ps);
         }
     }
 }
 
-
 function pp(x, y, h, d) {
-    var fg=25;
+    var fg=15;
     b=d>fg?(Math.exp(-(d-fg)*fg*1e-2)*h)|0:h;
     c.fillStyle = 'rgb(0,'+(h==-1?0:b)+',0)';
     c.fillRect(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
 }
 
 render = function(t, fps) {
-    var f=Math.sin(t/30)/2+0.5,f=1,imin=0.1;imax=40,di=0.05;
+    var f=Math.sin(t/30)/2+0.5,f=1,imin=0.1;imax=40,di=0.1;
     var x,y,d,b,fy=0;
     var o={
-        x:10+t,
-        y:8,
-        z:250+t
+        x:2,
+        y:1.5,
+        z:10+t/3
     }
 
-    for (y = 0; y < vh; y+=1) {
+    for (y = 20; y < vh-20; y+=1) {
         for (x = 0; x < vw; x+=1) {
-            d={x:x/vw-0.5,y:y/vh-0.8,z:f};
+            d={x:x/vw-0.5,y:y/vh-0.6,z:f};
             b=-1;
 
             for (i=imin; i<imax; i+=di) {
@@ -112,7 +121,7 @@ render = function(t, fps) {
                     z:o.z+i*d.z,
                 }
 
-                fy = hm[((p.z*10)%ts*ts+(p.x*10)%ts)|0];
+                fy = hm[((p.z*30)%ts*ts+(p.x*30)%ts)|0];
 
                 if (p.y < fy) {
                     b=fy*250|0;
@@ -131,7 +140,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 (function loop() {
-    //requestAnimFrame(loop);
+    requestAnimationFrame(loop);
     // only render when running
     if (run==1) {
         render(t++, fps);
