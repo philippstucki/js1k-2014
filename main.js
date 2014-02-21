@@ -17,18 +17,16 @@ var pixelSize = 8,
     run=1,
     ts=512,
     ts_2=ts*ts;
-    t_persistence=1/8,
-    t_octaves=4,
-    t_scale=20,
-    t_amplify=1.2,
+    t_persistence=1/3,
+    t_octaves=5,
+    t_scale=9,
+    t_amplify=0.9,
     noise=[],
     hm=[],
     mr=Math.random,
     ms=Math.sin,
     mp=Math.pow
     ;
-
-c.fillStyle = 'black';
 
 t = fps = 0;
 st = new Date().getTime();
@@ -77,7 +75,8 @@ for (i=0;i<ts*ts;i++) {
 }
 for (y = 0; y < ts; y+=1) {
     for (x = 0; x < ts; x+=1) {
-        hm[y*ts+x]=pnoise(x/t_scale,y/t_scale);
+        hm[y*ts+x]=(2.0-mp(0.3,pnoise(x/t_scale,y/t_scale)-0.99));
+        //hm[y*ts+x]=pnoise(x/t_scale,y/t_scale);
     }
 }
 
@@ -94,24 +93,24 @@ function plotHm() {
 }
 
 function pp(x, y, h, d) {
-    var fg=15;
+    var fg=10;
     b=d>fg?(Math.exp(-(d-fg)*fg*1e-2)*h)|0:h;
     c.fillStyle = 'rgb(0,'+(h==-1?0:b)+',0)';
     c.fillRect(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
 }
 
 render = function(t, fps) {
-    var f=Math.sin(t/30)/2+0.5,f=1,imin=0.1;imax=40,di=0.1;
+    var f=1,imin=1.1;imax=25,di=0.1;
     var x,y,d,b,fy=0;
     var o={
         x:2,
-        y:1.5,
-        z:10+t/3
+        y:1.0,
+        z:10+t*0.1
     }
 
     for (y = 20; y < vh-20; y+=1) {
         for (x = 0; x < vw; x+=1) {
-            d={x:x/vw-0.5,y:y/vh-0.6,z:f};
+            d={x:x/vw-0.5,y:y/vh-0.5,z:f};
             b=-1;
 
             for (i=imin; i<imax; i+=di) {
@@ -121,10 +120,10 @@ render = function(t, fps) {
                     z:o.z+i*d.z,
                 }
 
-                fy = hm[((p.z*30)%ts*ts+(p.x*30)%ts)|0];
+                fy = hm[((p.z*15)%ts*ts+(p.x*15)%ts)|0];
 
                 if (p.y < fy) {
-                    b=fy*250|0;
+                    b=fy*300|0;
                     break;
                 }
             }
