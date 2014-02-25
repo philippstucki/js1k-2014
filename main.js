@@ -1,9 +1,6 @@
 // make jslint stop after the first error so we can do all sort of nasty tricks
 /*jslint passfail: true*/
 
-hme = document.getElementById('hm');
-hmc = hme.getContext('2d');
-
 // declare global vars to enable shortening by google closure compiler
 var pixelSize = 10,
     PI = Math.PI,
@@ -76,23 +73,8 @@ for (i=0;i<ts*ts;i++) {
 for (y = 0; y < ts; y+=1) {
     for (x = 0; x < ts; x+=1) {
         hm[y*ts+x]=(2.0-mp(0.3,pnoise(x/t_scale,y/t_scale)-0.99));
-        //hm[y*ts+x]=pnoise(x/t_scale,y/t_scale);
     }
 }
-
-/*
-plotHm();
-
-function plotHm() {
-    var ps=Math.max(10-Math.log(ts-1)/Math.LN2|0,1);
-    for(y=0;y<ts;y++) {
-        for(x=0;x<ts;x++) {
-            hmc.fillStyle = 'rgb(0,'+(hm[y*ts+x]*250|0)+',0)';
-            hmc.fillRect(x*ps, y*ps, ps, ps);
-        }
-    }
-}
-*/
 
 function pp(x, y, h, d) {
     var br,fg=8,r,g,b;
@@ -113,7 +95,7 @@ render = function(t) {
         z:10+t*0.1
     }
 
-    for (y = 20; y < vh-20; y+=1) {
+    for (y = 0; y < vh-0; y+=1) {
         for (x = 0; x < vw; x+=1) {
             d={x:x/vw-0.5,y:y/vh-0.8,z:f};
             b=-1;
@@ -128,7 +110,7 @@ render = function(t) {
                 fy = hm[((p.z*15)%ts*ts+(p.x*15)%ts)|0];
 
                 if (p.y < fy) {
-                    b=fy*300|0;
+                    b=Math.max(0,fy*350|0);
                     break;
                 }
             }
