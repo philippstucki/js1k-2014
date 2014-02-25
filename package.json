@@ -1,0 +1,8 @@
+{
+  "name": "js1k-2014",
+  "version": "0.1.0",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-closurecompiler": "~0.9.9"
+  }
+}
