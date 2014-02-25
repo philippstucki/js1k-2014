@@ -5,7 +5,7 @@ hme = document.getElementById('hm');
 hmc = hme.getContext('2d');
 
 // declare global vars to enable shortening by google closure compiler
-var pixelSize = 8,
+var pixelSize = 10,
     PI = Math.PI,
     w=a.width,
     vw=w/pixelSize|0,
@@ -80,6 +80,7 @@ for (y = 0; y < ts; y+=1) {
     }
 }
 
+/*
 plotHm();
 
 function plotHm() {
@@ -91,33 +92,37 @@ function plotHm() {
         }
     }
 }
+*/
 
 function pp(x, y, h, d) {
-    var fg=10;
-    b=d>fg?(Math.exp(-(d-fg)*fg*1e-2)*h)|0:h;
-    c.fillStyle = 'rgb(0,'+(h==-1?0:b)+',0)';
+    var br,fg=8,r,g,b;
+    br=d>fg?(Math.exp(-(d-fg)*fg*2e-2)*h)|0:h;
+    r = 0;
+    g=h==-1?0:br;
+    b=h==-1?210:0;
+    c.fillStyle = 'rgb(0,'+g+','+b+')';
     c.fillRect(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
 }
 
-render = function(t, fps) {
-    var f=1,imin=1.1;imax=25,di=0.1;
+render = function(t) {
+    var f=1,imin=1.1;imax=15,di=0.1;
     var x,y,d,b,fy=0;
     var o={
         x:2,
-        y:1.0,
+        y:2.0,
         z:10+t*0.1
     }
 
     for (y = 20; y < vh-20; y+=1) {
         for (x = 0; x < vw; x+=1) {
-            d={x:x/vw-0.5,y:y/vh-0.5,z:f};
+            d={x:x/vw-0.5,y:y/vh-0.8,z:f};
             b=-1;
 
             for (i=imin; i<imax; i+=di) {
                 var p = {
                     x:o.x+i*d.x,
                     y:o.y+i*d.y,
-                    z:o.z+i*d.z,
+                    z:o.z+i*d.z
                 }
 
                 fy = hm[((p.z*15)%ts*ts+(p.x*15)%ts)|0];
@@ -138,12 +143,14 @@ document.addEventListener('keydown', function(e) {
     run = e.keyCode==32 ? run*-1 : run*1;
 });
 
-(function loop() {
+function loop() {
     requestAnimationFrame(loop);
     // only render when running
     if (run==1) {
-        render(t++, fps);
+        render(t++);
         fps = Math.round(10*(t*1E3/(new Date().getTime() - st)))/10;
         t%10==0 && console.log(fps);
     }
-})();
+};
+loop();
+
