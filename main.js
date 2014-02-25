@@ -2,7 +2,7 @@
 /*jslint passfail: true*/
 
 // declare global vars to enable shortening by google closure compiler
-var pixelSize = 8,
+var pixelSize = 12,
     PI = Math.PI,
     w=a.width,
     vw=w/pixelSize|0,
@@ -35,29 +35,28 @@ function pp(x, y, h, d) {
 
 function mod_xz(v, m) {
     return {
-        x: v.x%m,
-        y: v.y,
-        z: v.z%m
+        x: v.x%m-m/2,
+        y: v.y%m-m/2,
+        z: v.z%m-m/2
     };
 }
 
 function DE_sphere(p,r) {
-    p=mod_xz(p,1);
     return mM(0,msq(p.x*p.x+p.y*p.y+p.z*p.z)-r);
 }
 
 render = function(t) {
-    var f=1,imax=20;
+    var f=1.0,imax=25;
     var x,y,d,b,distance,dd,p,i;
     var o={
-        x:100+t/32,
-        y:1.8,
-        z:-20-t/16
+        x:10+1/32,
+        y:10,
+        z:0+t/32
     }
 
     for (y = 0; y < vh-0; y+=1) {
         for (x = 0; x < vw; x+=1) {
-            d={x:x/vw-0.5,y:y/vh-0.7,z:f};
+            d={x:x/vw-0.5,y:y/vh-0.8,z:f};
             b=-1;
 
             distance = 0;
@@ -67,7 +66,7 @@ render = function(t) {
                     y:o.y+distance*d.y,
                     z:o.z+distance*d.z
                 }
-                dd = DE_sphere(p, 0.4);
+                dd = DE_sphere(mod_xz(p,1), 0.2+ms(t/16)*0.10);
                 distance+=dd;
                 if (dd < 0.005) break;
             }
