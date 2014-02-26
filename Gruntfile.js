@@ -8,6 +8,7 @@ module.exports = function (grunt) {
                     "main.min.js": ['main.js']
                 },
                 options: {
+                    "define": "DEBUG=false",
                     "compilation_level": "ADVANCED_OPTIMIZATIONS"
                 }
             }

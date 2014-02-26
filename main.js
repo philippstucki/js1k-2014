@@ -1,6 +1,9 @@
 // make jslint stop after the first error so we can do all sort of nasty tricks
 /*jslint passfail: true*/
 
+/** @define {boolean} */
+var DEBUG = true;
+
 // declare global vars to enable shortening by google closure compiler
 var pixelSize = 8,
     PI = Math.PI,
@@ -9,7 +12,7 @@ var pixelSize = 8,
     h=a.height,
     vh=h/pixelSize|0,
     fps,
-    t,
+    t=0,
     theta=0,
     st,
     run=1,
@@ -20,14 +23,18 @@ var pixelSize = 8,
     mp=M.pow,
     me=M.exp,
     mM=M.max,
-    msq=M.sqrt
+    msq=M.sqrt,
+    render
     ;
 
-t = fps = 0;
-st = new Date().getTime();
+
+if (DEBUG) {
+    st = new Date().getTime();
+    fps=0;
+}
 
 function pp(x, y, h, d) {
-    var br,fg=8,r,g,b;
+    var br,fg=80,r,g,b;
     br=d>fg?(me(-(d-fg)*fg*2e-2)*h)|0:h;
     r = 0;
     g=h==-1?0:br;
@@ -73,7 +80,7 @@ function translate(p, x, y, z) {
 }
 
 render = function(t) {
-    var f=0.8,imax=25;
+    var f=1,imax=25;
     var x,y,d,b,distance,dd,p,i;
     var o={
         x:10+ms(t/60)*2,
@@ -110,18 +117,22 @@ render = function(t) {
 }
 
 // add event listener to bind fun2tion keys
-onkeydown=function(e) {
-    run = e.keyCode==32 ? run*-1 : run*1;
-};
+if (DEBUG) {
+    onkeydown=function(e) {
+        run = e.keyCode==32 ? run*-1 : run*1;
+    };
+}
 
 function loop() {
     requestAnimationFrame(loop);
     // only render when running
     if (run==1) {
         render(t++);
-        fps = Math.round(10*(t*1E3/(new Date().getTime() - st)))/10;
-        t%10==0 && console.log(fps);
+
+        if (DEBUG) {
+            fps = Math.round(10*(t*1E3/(new Date().getTime() - st)))/10;
+            t%10==0 && console.log(fps);
+        }
     }
 };
 loop();
-
