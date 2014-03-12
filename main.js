@@ -3,6 +3,7 @@
 
 /** @define {boolean} */
 var DEBUG = true;
+var SOUND = true;
 
 // declare global vars to enable shortening by google closure compiler
 var pixelSize = 8,
@@ -33,13 +34,8 @@ if (DEBUG) {
     fps=0;
 }
 
-function pp(x, y, h, d) {
-    var br,fg=80,r,g,b;
-    br=d>fg?(me(-(d-fg)*fg*2e-2)*h)|0:h;
-    r = 0;
-    g=h==-1?0:br;
-    b=h==-1?210:0;
-    c.fillStyle = 'rgb(0,'+g+','+b+')';
+function pp(x, y, v) {
+    c.fillStyle = 'rgb(0,'+v+',0)';
     c.fillRect(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
 }
 
@@ -53,6 +49,13 @@ function mod_xz(v, m) {
 
 function DE_sphere(p, r) {
     return mM(0,msq(p.x*p.x+p.y*p.y+p.z*p.z)-r);
+}
+
+function DE_displaced_sphere(p, r) {
+    var d1,d2;
+    d1 = DE_sphere(p, r);
+    d2 = ms(1.5*p.x)*ms(1.5*p.y);
+    return d1+d2;
 }
 
 function rotate_Y(p, t) {
@@ -80,7 +83,7 @@ function translate(p, x, y, z) {
 }
 
 render = function(t) {
-    var f=1,imax=25;
+    var f=1,imax=20;
     var x,y,d,b,distance,dd,p,i;
     var o={
         x:10+ms(t/60)*2,
@@ -89,7 +92,7 @@ render = function(t) {
     }
     theta+=(ms(t/34)+1)*0.02;
 
-    for (y = 0; y < vh-0; y+=1) {
+    for (y = 0; y < vh; y+=1) {
         for (x = 0; x < vw; x+=1) {
             d={x:x/vw-0.5,y:y/vh-0.5,z:f};
             b=-1;
@@ -111,7 +114,7 @@ render = function(t) {
             }
             b=(1-i/imax)*250|0;
 
-            pp(x,vh-y,b,p.z-o.z);
+            pp(x,vh-y,b);
         }
     }
 }
@@ -120,11 +123,12 @@ render = function(t) {
 if (DEBUG) {
     onkeydown=function(e) {
         run = e.keyCode==32 ? run*-1 : run*1;
+        e.keyCode==32 && a_jsnode.disconnect();
     };
 }
 
 function loop() {
-    requestAnimationFrame(loop);
+    //requestAnimationFrame(loop);
     // only render when running
     if (run==1) {
         render(t++);
@@ -136,3 +140,28 @@ function loop() {
     }
 };
 loop();
+
+if (SOUND) {
+
+    osc_sin = function(w) {
+        return Math.sin(w);
+    };
+
+    var a_ctx,a_jsnode,a_delta,
+    osc1 = {phi:0, f:0};
+    a_ctx = new AudioContext();
+
+    a_jsnode = a_ctx.createScriptProcessor(1<<12, 0, 1);
+    a_jsnode.connect(a_ctx.destination);
+    a_jsnode.onaudioprocess = function(e) {
+        var y1,bt,t,v,sr=a_ctx.sampleRate;
+        y1 = e.outputBuffer.getChannelData(0);
+        bt = ~~a_ctx.currentTime*a_ctx.sampleRate;
+
+        for (i=0; i<y1.length; i++) {
+            y1[i]=(v&0xff)/128-1;
+        }
+
+    };
+
+}

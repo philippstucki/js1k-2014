@@ -9,10 +9,11 @@ module.exports = function (grunt) {
                 },
                 options: {
                     "define": "DEBUG=false",
-                    "compilation_level": "ADVANCED_OPTIMIZATIONS"
+                    "compilation_level": "ADVANCED_OPTIMIZATIONS",
+                    "externs": [ "externs/w3c_audio.js"]
                 }
             }
-        },
+        }
     });
 
     // These plugins provide necessary tasks.
