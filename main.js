@@ -8,6 +8,7 @@ var SOUND = true;
 // declare global vars to enable shortening by google closure compiler
 var pixelSize = 8,
     PI = Math.PI,
+    TPI = 2*PI,
     w=a.width,
     vw=w/pixelSize|0,
     h=a.height,
@@ -24,6 +25,7 @@ var pixelSize = 8,
     mp=M.pow,
     me=M.exp,
     mM=M.max,
+    mm=M.min,
     msq=M.sqrt,
     render
     ;
@@ -123,44 +125,111 @@ render = function(t) {
 if (DEBUG) {
     onkeydown=function(e) {
         run = e.keyCode==32 ? run*-1 : run*1;
-        e.keyCode==32 && a_jsnode.disconnect();
+        SOUND && (e.keyCode==32 && a_jsnode.disconnect());
     };
 }
 
 function loop() {
     //requestAnimationFrame(loop);
-    // only render when running
-    if (run==1) {
-        render(t++);
 
-        if (DEBUG) {
+    if (DEBUG) {
+        if (run==1) {
+            render(t++);
             fps = Math.round(10*(t*1E3/(new Date().getTime() - st)))/10;
             t%10==0 && console.log(fps);
         }
+    } else {
+        render(t++);
     }
 };
 loop();
 
 if (SOUND) {
 
-    osc_sin = function(w) {
-        return Math.sin(w);
-    };
+/*
+    key table
+
+    Notation | nr
+    ---------+--
+    c        | 1
+    c#       | 2
+    d        | 3
+    d#       | 4
+    e        | 5
+    f        | 6
+    f#       | 7
+    g        | 8
+    g#       | 9
+    a        | 10
+    a#       | 11
+    b        | 12
+
+    octave: +12
+
+*/
+
+    function osc_sin(w) {
+        return ms(w);
+    }
+    function osc_square(w) {
+        return w>PI?1:-1;
+    }
+    function osc_pulse(w, pw) {
+        return w>(pw+1)/2*TPI?1:-1;
+    }
+    function osc_saw(w) {
+        return w/PI-1;
+    }
+
+    function keyfrequency(n) {
+        return mp(2,(n-34)/12)*440;
+    }
+
 
     var a_ctx,a_jsnode,a_delta,
-    osc1 = {phi:0, f:0};
+    osc1 = {p:0, w:0, r: 0.6, v:0.35, t:12, a:0},
+    osc2 = {p:0, w:0, r: 0.1, v:0.4, t:0, a:0},
+    bt=0,
+    pattern1=[7,0,0,5,0,0,0,0,0,0,8,0,0,6,0,0],
+    pattern2=[1,2,3,4,5,0,7,8];
     a_ctx = new AudioContext();
 
     a_jsnode = a_ctx.createScriptProcessor(1<<12, 0, 1);
     a_jsnode.connect(a_ctx.destination);
     a_jsnode.onaudioprocess = function(e) {
-        var y1,bt,t,v,sr=a_ctx.sampleRate;
+        var y1,n,v,sr=a_ctx.sampleRate,delta,bpm=140,res=60/(bpm*4),getVoiceValue;
+
+        getVoiceValue = function(osc, pattern) {
+            var note = pattern[(n/(res*sr)|0)%pattern.length];
+
+            // modulates pulse width
+            osc.w=osc.a*0.2;
+
+            if ((bt+i)%(sr*res)==0 && note !=0) {
+                if (note!=0) osc.a=1;
+                osc.f = keyfrequency(note+osc.t);
+            }
+
+            // calculate new phase
+            delta = (2*PI*osc.f)/sr;
+            osc.p = (osc.p+delta)%(2*PI);
+
+            // calculate current amplitude based on envelope
+            osc.a -= 1/(osc.r*sr);
+            osc.a = mM(osc.a,0);
+
+            // calculate current voice value
+            return osc.v*osc.a*osc_pulse(osc.p, osc.w);
+        }
+
         y1 = e.outputBuffer.getChannelData(0);
-        bt = ~~a_ctx.currentTime*a_ctx.sampleRate;
 
         for (i=0; i<y1.length; i++) {
-            y1[i]=(v&0xff)/128-1;
+            n=bt+i;
+            y1[i] = getVoiceValue(osc1, pattern1)
+                    +getVoiceValue(osc2, pattern2);
         }
+        bt+=y1.length;
 
     };
 
