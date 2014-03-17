@@ -5,6 +5,31 @@
 var DEBUG = true;
 var SOUND = true;
 
+/*
+ * window:
+ *      Ado: AudioContext()
+ *      rqt: requestAnimationFramework()
+ *
+ * AudioContext:
+ *      flc: fillRect()
+ *      smR: sampleRate
+ *      dsa: destination
+ *
+ * AudioDestinationNode:
+ *      ceS: createScriptProcessor()
+ *
+ * ScriptProcessorNode:
+ *      cnt: connect()
+ */
+function shorten(o) {
+    for (e in o) {
+        o[e[0]+e[2]+(e[6]||'')] = o[e];
+    }
+}
+
+shorten(this);
+shorten(c);
+
 // declare global vars to enable shortening by google closure compiler
 var pixelSize = 8,
     PI = Math.PI,
@@ -25,7 +50,6 @@ var pixelSize = 8,
     mp=M.pow,
     me=M.exp,
     mM=M.max,
-    mm=M.min,
     msq=M.sqrt,
     render
     ;
@@ -38,7 +62,7 @@ if (DEBUG) {
 
 function pp(x, y, v) {
     c.fillStyle = 'rgb(0,'+v+',0)';
-    c.fillRect(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
+    c.flc(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
 }
 
 function mod_xz(v, m) {
@@ -86,11 +110,11 @@ function translate(p, x, y, z) {
 
 render = function(t) {
     var f=1,imax=20;
-    var x,y,d,b,distance,dd,p,i;
+    var x,y,d,b,distance,dd,p,i,origin=11+t/33;
     var o={
-        x:10+ms(t/60)*2,
-        y:10+ms(t/50),
-        z:10+t/33
+        x:10,
+        y:origin,
+        z:origin
     }
     theta+=(ms(t/34)+1)*0.02;
 
@@ -107,8 +131,8 @@ render = function(t) {
                     z:o.z+distance*d.z
                 };
                 p=translate(p,-o.x,-o.y,-o.z);
-                p=rotate_Z(p,theta);
-                p=rotate_Y(p,theta/8);
+                //p=rotate_Z(p,theta);
+                p=rotate_Y(p,theta/2);
                 p=translate(p,o.x,o.y,o.z);
                 dd = DE_sphere(mod_xz(p,1), 0.2);
                 distance+=dd;
@@ -130,7 +154,7 @@ if (DEBUG) {
 }
 
 function loop() {
-    //requestAnimationFrame(loop);
+    rqt(loop);
 
     if (DEBUG) {
         if (run==1) {
@@ -187,17 +211,21 @@ if (SOUND) {
 
 
     var a_ctx,a_jsnode,a_delta,
-    osc1 = {p:0, w:0, r: 0.6, v:0.35, t:12, a:0},
-    osc2 = {p:0, w:0, r: 0.1, v:0.4, t:0, a:0},
+    osc1 = {p:0, w:0, r: 0.09, v:0.35, t:24, a:0},
+    osc2 = {p:0, w:0, r: 0.1, v:0.4, t:-5, a:0},
     bt=0,
-    pattern1=[7,0,0,5,0,0,0,0,0,0,8,0,0,6,0,0],
-    pattern2=[1,2,3,4,5,0,7,8];
-    a_ctx = new AudioContext();
+    pattern1=[7,0,0,5,0,3,0,0,1,0,8,0,0,6,0,0],
+    pattern2=[1,0,0,2,3,1,1,0];
 
-    a_jsnode = a_ctx.createScriptProcessor(1<<12, 0, 1);
-    a_jsnode.connect(a_ctx.destination);
+    a_ctx = new Ado();
+    shorten(a_ctx);
+
+    a_jsnode = a_ctx.ceS(1<<12, 0, 1);
+    shorten(a_jsnode);
+    a_jsnode.cnt(a_ctx.dsa);
+
     a_jsnode.onaudioprocess = function(e) {
-        var y1,n,v,sr=a_ctx.sampleRate,delta,bpm=140,res=60/(bpm*4),getVoiceValue;
+        var y1,n,sr=a_ctx.smR,delta,bpm=140,res=60/(bpm*4),getVoiceValue;
 
         getVoiceValue = function(osc, pattern) {
             var note = pattern[(n/(res*sr)|0)%pattern.length];
@@ -206,13 +234,13 @@ if (SOUND) {
             osc.w=osc.a*0.2;
 
             if ((bt+i)%(sr*res)==0 && note !=0) {
-                if (note!=0) osc.a=1;
+                osc.a=1;
                 osc.f = keyfrequency(note+osc.t);
             }
 
             // calculate new phase
-            delta = (2*PI*osc.f)/sr;
-            osc.p = (osc.p+delta)%(2*PI);
+            delta = (TPI*osc.f)/sr;
+            osc.p = (osc.p+delta)%(TPI);
 
             // calculate current amplitude based on envelope
             osc.a -= 1/(osc.r*sr);
@@ -222,7 +250,9 @@ if (SOUND) {
             return osc.v*osc.a*osc_pulse(osc.p, osc.w);
         }
 
-        y1 = e.outputBuffer.getChannelData(0);
+        shorten(e);
+        shorten(e.otB);
+        y1 = e.otB.gtn(0);
 
         for (i=0; i<y1.length; i++) {
             n=bt+i;
