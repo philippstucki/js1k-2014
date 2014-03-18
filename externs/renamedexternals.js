@@ -2,7 +2,10 @@
  * @externs
  */
 
-
+/** @type {number} */
+HTMLElement.protoype.wd;
+/** @type {number} */
+HTMLElement.protoype.hi;
 
 var CanvasRenderingContext2D = function() {};
 /**

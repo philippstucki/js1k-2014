@@ -29,29 +29,29 @@ function shorten(o) {
 
 shorten(this);
 shorten(c);
+shorten(a);
 
 // declare global vars to enable shortening by google closure compiler
-var pixelSize = 8,
-    PI = Math.PI,
+var pixelSize = 10,
+    M=Math,
+    PI = M.PI,
     TPI = 2*PI,
-    w=a.width,
+    w=a.wd,
     vw=w/pixelSize|0,
-    h=a.height,
+    h=a.hi,
     vh=h/pixelSize|0,
     fps,
     t=0,
     theta=0,
     st,
     run=1,
-    M=Math,
     mr=M.random,
     ms=M.sin,
     mc=M.cos,
     mp=M.pow,
     me=M.exp,
     mM=M.max,
-    msq=M.sqrt,
-    render
+    msq=M.sqrt
     ;
 
 
@@ -108,31 +108,27 @@ function translate(p, x, y, z) {
     };
 }
 
-render = function(t) {
+var render = function(t) {
     var f=1,imax=20;
-    var x,y,d,b,distance,dd,p,i,origin=11+t/33;
-    var o={
-        x:10,
-        y:origin,
-        z:origin
-    }
-    theta+=(ms(t/34)+1)*0.02;
+    var x,y,d,b,distance,dd,p,i,origin=13+t/40;
+    var o={};
+    o.x=origin;o.y=o.z=10;
+    theta+=(ms(t/30)+1)/80;
 
-    for (y = 0; y < vh; y+=1) {
-        for (x = 0; x < vw; x+=1) {
-            d={x:x/vw-0.5,y:y/vh-0.5,z:f};
-            b=-1;
+    y=vh;while(y--) {
+        x=vw;while(x--) {
+            d={x:x/vw-0.5,y:y/vh-0.5};
 
             distance = 0;
             for (i=0; i<imax; i++) {
                 p = {
                     x:o.x+distance*d.x,
                     y:o.y+distance*d.y,
-                    z:o.z+distance*d.z
+                    z:o.z+distance
                 };
                 p=translate(p,-o.x,-o.y,-o.z);
-                //p=rotate_Z(p,theta);
-                p=rotate_Y(p,theta/2);
+                p=rotate_Z(p,theta);
+                p=rotate_Y(p,theta);
                 p=translate(p,o.x,o.y,o.z);
                 dd = DE_sphere(mod_xz(p,1), 0.2);
                 distance+=dd;
@@ -211,10 +207,10 @@ if (SOUND) {
 
 
     var a_ctx,a_jsnode,a_delta,
-    osc1 = {p:0, w:0, r: 0.09, v:0.35, t:24, a:0},
+    osc1 = {p:0, w:0, r: 0.05, v:0.35, t:14, a:0},
     osc2 = {p:0, w:0, r: 0.1, v:0.4, t:-5, a:0},
     bt=0,
-    pattern1=[7,0,0,5,0,3,0,0,1,0,8,0,0,6,0,0],
+    pattern1=[7,0,7,0,0,0,0,5],
     pattern2=[1,0,0,2,3,1,1,0];
 
     a_ctx = new Ado();
@@ -225,15 +221,15 @@ if (SOUND) {
     a_jsnode.cnt(a_ctx.dsa);
 
     a_jsnode.onaudioprocess = function(e) {
-        var y1,n,sr=a_ctx.smR,delta,bpm=140,res=60/(bpm*4),getVoiceValue;
+        var y1,n,sr=a_ctx.smR,delta,res=60/(4*140),getVoiceValue,notelength=sr*res;
 
         getVoiceValue = function(osc, pattern) {
-            var note = pattern[(n/(res*sr)|0)%pattern.length];
+            var note = pattern[(n/(notelength)|0)%pattern.length];
 
             // modulates pulse width
-            osc.w=osc.a*0.2;
+            osc.w=osc.a*0.2*note/10;
 
-            if ((bt+i)%(sr*res)==0 && note !=0) {
+            if ((n)%(notelength)==0 && note !=0) {
                 osc.a=1;
                 osc.f = keyfrequency(note+osc.t);
             }
