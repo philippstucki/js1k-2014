@@ -275,8 +275,8 @@ if (SOUND) {
             osc4.t=osc3.t+7;
             osc5.t=osc4.t+8;
 
-            y1[i] = 0
-                    + getVoiceValue(osc1, pattern1, start) // kick
+            y1[i] =
+                    getVoiceValue(osc1, pattern1, start) // kick
                     + getVoiceValue(osc3, pattern3, start) // base
                     + (ms(t/200)/3+0.8)*(getVoiceValue(osc4, pattern3, start)+getVoiceValue(osc5, pattern3, start)) //voice
                     ;
