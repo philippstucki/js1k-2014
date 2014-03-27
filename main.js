@@ -3,7 +3,10 @@
 
 /** @define {boolean} */
 var DEBUG = true;
+/** @define {boolean} */
 var SOUND = true;
+/** @define {boolean} */
+var ROTATE = false;
 
 /*
  * window:
@@ -32,16 +35,21 @@ shorten(c);
 shorten(a);
 
 // declare global vars to enable shortening by google closure compiler
-var pixelSize = 6,
+var
+    numpixels=65,
+    w=a.wd,
+    h=a.hi,
+    pixelSizeX = w/numpixels|0,
+    pixelSizeY = h/numpixels|0,
+    vw=numpixels,
+    vh=numpixels,
     M=Math,
     PI = M.PI,
     TPI = 2*PI,
-    w=a.wd,
-    vw=w/pixelSize|0,
-    h=a.hi,
-    vh=h/pixelSize|0,
     fps,
     t=0,
+    beat=0,
+    beatsync=0,
     theta=0,
     st,
     run=1,
@@ -57,7 +65,7 @@ var pixelSize = 6,
     o={}
     ;
 
-o.x=o.y=o.z=6;
+o.x=o.y=o.z=60;
 
 
 if (DEBUG) {
@@ -66,8 +74,8 @@ if (DEBUG) {
 }
 
 function pp(x, y, v) {
-    c.fillStyle = 'hsla('+[hue,v*80+'%',v*light+'%',0.8];
-    c.flc(x*pixelSize, y*pixelSize, pixelSize, pixelSize);
+    c.fillStyle = 'hsla('+[hue,v*80+'%',v*light+'%',1];
+    c.flc(x*pixelSizeX, y*pixelSizeY, pixelSizeX, pixelSizeY);
 }
 
 function mod_xz(v, m) {
@@ -115,10 +123,12 @@ function translate(p, x, y, z) {
 
 var render = function() {
     var f=1,imax=20;
-    var x,y,d,b,distance,dd,p,i,walk=0.02;
+    var x,y,d,b,distance,dd,p,i,walk=1/20;
 
-    o.z=t/5;
-    o.x=t/5;
+    o.z+=beatsync<16?walk:0;
+    o.x+=beatsync<16?0:walk;
+
+
 
     y=vh;while(y--) {
         x=vw;while(x--) {
@@ -131,10 +141,12 @@ var render = function() {
                     y:o.y+distance*d.y,
                     z:o.z+distance
                 };
-                p=translate(p,-o.x,-o.y,-o.z);
-                p=rotate_Z(p,t/300);
-                //p=rotate_Y(p,t/400);
-                p=translate(p,o.x,o.y,o.z);
+                if (ROTATE) {
+                    p=translate(p,-o.x,-o.y,-o.z);
+                    p=rotate_Z(p,t/300);
+                    //p=rotate_Y(p,t/400);
+                    p=translate(p,o.x,o.y,o.z);
+                }
                 dd = DE_sphere(mod_xz(p,1), 0.2);
                 distance+=dd;
                 if (dd < 5e-4) break;
@@ -169,28 +181,6 @@ loop();
 
 if (SOUND) {
 
-/*
-    key table
-
-    Notation | nr
-    ---------+--
-    c        | 1
-    c#       | 2
-    d        | 3
-    d#       | 4
-    e        | 5
-    f        | 6
-    f#       | 7
-    g        | 8
-    g#       | 9
-    a        | 10
-    a#       | 11
-    b        | 12
-
-    octave: +12
-
-*/
-
     function osc_sin(w) {
         return ms(w);
     }
@@ -210,15 +200,22 @@ if (SOUND) {
 
 
     var a_ctx,a_jsnode,a_delta,
-    osc1 = {f:0, p:0, w:0, a:0, r: 1/6, v:1/3, t:-10, n:0},
-    osc2 = {f:0, p:0, w:0, a:0, r: 1/9, v:1/3, t:0, n:1},
-    osc3 = {f:0, p:0, w:0, a:0, r: 1, v:1/11, n:0},
-    osc4 = {f:0, p:0, w:0, a:0, r: 1, v:1/11, n:0},
-    osc5 = {f:0, p:0, w:0, a:0, r: 1, v:1/11, n:0},
+    osc1 = {f:0, p:0, w:0, a:0, r:1, v:1/11},
+    osc2 = {f:0, p:0, w:0, a:0, r:1, v:1/11},
+    osc3 = {f:0, p:0, w:0, a:0, r:1, v:1/11},
+    osc4 = {f:0, p:0, w:0, a:0, r:1, v:1/11},
+    osc5 = {f:0, p:0, w:0, a:0, r:1, v:1/11},
+
     pattern1=[1,0,0,0],
-    pattern2=[1,0,0],
     pattern3=[1,4,7],
     bt=0;
+
+    osc1.v=1/3;
+    osc2.v=1/3;
+    osc1.r=1/6;
+    osc1.t=-10;
+    osc2.r=1/9;
+    osc2.n=1;
 
     a_ctx = new Ado();
     shorten(a_ctx);
@@ -228,14 +225,14 @@ if (SOUND) {
     a_jsnode.cnt(a_ctx.dsa);
 
     a_jsnode.onaudioprocess = function(e) {
-        var y1,n,sr=a_ctx.smR,delta,res=60/(4*140),getVoiceValue,beatlength=sr*res|0;
-        var beat,starta,vtranspose;
+        var y1,n,sr=a_ctx.smR,delta,res=60/(4*120),getVoiceValue,beatlength=sr*res|0;
+        var start,vtranspose;
 
         getVoiceValue = function(osc, pattern, start) {
             var note = pattern[beat%pattern.length];
 
             // modulates pulse width
-            osc.w=(ms(mc(t/20))*1/3+1/3)*osc.a;
+            osc.w=(ms(t/20)*1/3+1/3)*osc.a;
 
             if (start && note !=0) {
                 osc.a=1;
@@ -252,8 +249,7 @@ if (SOUND) {
             osc.a = mM(osc.a,0);
 
             // calculate current voice value
-            return osc.v*osc.a*(osc.n?mr():osc_pulse(osc.p, osc.w));
-            return osc.v*osc.a*(osc.n*mr()+(1-osc.n)*osc_pulse(osc.p, osc.w));
+            return osc.v*osc.a*osc_pulse(osc.p, osc.w);
         }
 
         shorten(e);
@@ -274,17 +270,15 @@ if (SOUND) {
             t+=1/400;
 
             // transpose arpeggio voices
-            osc3.t = beat%32>16?8:5;
+            beatsync=beat%32;
+            osc3.t = beatsync>16?8:5;
             osc4.t=osc3.t+7;
             osc5.t=osc4.t+8;
 
-
             y1[i] = 0
-                    + getVoiceValue(osc1, pattern1, start)
-                    + getVoiceValue(osc2, pattern2, start)
-                    + getVoiceValue(osc3, pattern3, start)
-                    + (beat>32?getVoiceValue(osc4, pattern3, start):0)
-                    + (beat>96?getVoiceValue(osc5, pattern3, start):0)
+                    + getVoiceValue(osc1, pattern1, start) // kick
+                    + getVoiceValue(osc3, pattern3, start) // base
+                    + (ms(t/200)/3+0.8)*(getVoiceValue(osc4, pattern3, start)+getVoiceValue(osc5, pattern3, start)) //voice
                     ;
         }
         bt+=y1.length;

@@ -8,7 +8,7 @@ module.exports = function (grunt) {
                     "main.min.js": ['main.js']
                 },
                 options: {
-                    "define": "DEBUG=false",
+                    "define": ["DEBUG=false", "ROTATE=false"],
                     "compilation_level": "ADVANCED_OPTIMIZATIONS",
                     "externs": [ "externs/renamedexternals.js"]
                 }
