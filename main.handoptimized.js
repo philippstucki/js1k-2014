@@ -1,10 +1,10 @@
-with(Math)r=2*PI,w=sin,x=pow,y=max,z=sqrt;n=a.width/65|0,p=a.height/65|0,A=1,B=100,E=C=D=60,s=0,u=v=O=0;
+with(Math)r=2*PI,w=sin,x=pow,y=max,z=sqrt;
+n=a.width/65|0,p=a.height/65|0,A=1,B=100,E=C=D=60,s=0,u=v=O=0;
 
 function F(){
     requestAnimationFrame(F);
-    //var h,d,g,l,k,m,b,f,t;
     D+=16>v?0.05:0;
-    E+=16>v?0:0.05;
+    E+=16>v?0:0.08;
     for(b=65;b--;)
         for(m=65; m--;){
             l=m/65-0.5;
@@ -13,7 +13,7 @@ function F(){
             l=1-t/20;
             k=m;
             f=65-b;
-            c.fillStyle="hsla("+[A,80*l+"%",l*B+"%",1];
+            c.fillStyle="hsla("+[A,80*l+"%",l*B+"%",0.4];
             c.fillRect(k*n,f*p,n,p)
         }
 }
