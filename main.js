@@ -62,6 +62,7 @@ var
     msq=M.sqrt,
     hue=1,
     light=100,
+    theta=0,
     o={}
     ;
 
@@ -127,7 +128,7 @@ var render = function() {
 
     o.z+=beatsync<16?walk:0;
     o.x+=beatsync<16?0:walk;
-
+    theta+=PI/60;
 
 
     y=vh;while(y--) {
@@ -143,7 +144,7 @@ var render = function() {
                 };
                 if (ROTATE) {
                     p=translate(p,-o.x,-o.y,-o.z);
-                    p=rotate_Z(p,t/300);
+                    p=rotate_Z(p,theta);
                     //p=rotate_Y(p,t/400);
                     p=translate(p,o.x,o.y,o.z);
                 }
