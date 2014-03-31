@@ -1,6 +1,6 @@
 # kraSyn
 
-Features a raymarched sphere field and a polyphone softsynth with polyrhythmic patterns.
+Features a raymarched sphere field and a polyphonic softsynth with polyrhythmic patterns.
 Voices are modulated pulses.
 
 Credits:
