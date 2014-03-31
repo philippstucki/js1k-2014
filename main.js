@@ -213,7 +213,7 @@ if (SOUND) {
     osc1.v=1/3;
     osc2.v=1/3;
     osc1.r=1/6;
-    osc1.t=-10;
+    osc1.t=-9;
     osc2.r=1/9;
     osc2.n=1;
 
@@ -273,12 +273,12 @@ if (SOUND) {
             beatsync=beat%32;
             osc3.t = beatsync>16?8:5;
             osc4.t=osc3.t+7;
-            osc5.t=osc4.t+8;
+            osc5.t=osc4.t+20;
 
             y1[i] =
                     getVoiceValue(osc1, pattern1, start) // kick
                     + getVoiceValue(osc3, pattern3, start) // base
-                    + (ms(t/200)/3+0.8)*(getVoiceValue(osc4, pattern3, start)+getVoiceValue(osc5, pattern3, start)) //voice
+                    + (ms(t/300-TPI/3)/3+1/3)*(getVoiceValue(osc4, pattern3, start)+getVoiceValue(osc5, pattern3, start)) //voice
                     ;
         }
         bt+=y1.length;
