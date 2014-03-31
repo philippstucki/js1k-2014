@@ -5,7 +5,7 @@ module.exports = function (grunt) {
             minify: {
                 files: {
                     // Destination: Sources...
-                    "main.min.js": ['main.js']
+                    "main.closure.min.js": ['main.js']
                 },
                 options: {
                     "define": ["DEBUG=false", "ROTATE=false"],

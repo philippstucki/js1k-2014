@@ -5,8 +5,8 @@ Voices are modulated pulses.
 
 Credits:
 lft for the hardware chiptune tracker: http://www.linusakesson.net/hardware/chiptune.php
-@syntopiadk for the series on distance estimated fractals http://blog.hvidtfeldts.net/index.php/2011/06/distance-estimated-3d-fractals-part-i/
-@kuvos for insisting on 1024 bytes the most basic optimization tips
+@syntopiadk for the series on distance estimated fractals: http://blog.hvidtfeldts.net/index.php/2011/06/distance-estimated-3d-fractals-part-i/
+@kuvos for insisting on 1024 bytes and the most basic size optimization tips
 
 
 # Useful Links
