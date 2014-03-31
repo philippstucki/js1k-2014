@@ -4,7 +4,7 @@ n=a.width/65|0,p=a.height/65|0,A=1,B=100,E=C=D=60,s=0,u=v=O=0;
 function F(){
     requestAnimationFrame(F);
     D+=16>v?0.05:0;
-    E+=16>v?0:0.08;
+    E+=16>v?0:0.05;
     for(b=65;b--;)
         for(m=65; m--;){
             l=m/65-0.5;
