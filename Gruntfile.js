@@ -10,7 +10,7 @@ module.exports = function (grunt) {
                 options: {
                     "define": ["DEBUG=false", "ROTATE=false"],
                     "compilation_level": "ADVANCED_OPTIMIZATIONS",
-                    "externs": [ "externs/renamedexternals.js"]
+                    "externs": [ "externs/w3c_audio.js"]
                 }
             }
         }

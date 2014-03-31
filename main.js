@@ -30,15 +30,15 @@ function shorten(o) {
     }
 }
 
-shorten(this);
-shorten(c);
-shorten(a);
+//shorten(this);
+//shorten(c);
+//shorten(a);
 
 // declare global vars to enable shortening by google closure compiler
 var
     numpixels=65,
-    w=a.wd,
-    h=a.hi,
+    w=a.width,
+    h=a.height,
     pixelSizeX = w/numpixels|0,
     pixelSizeY = h/numpixels|0,
     vw=numpixels,
@@ -75,7 +75,7 @@ if (DEBUG) {
 
 function pp(x, y, v) {
     c.fillStyle = 'hsla('+[hue,v*80+'%',v*light+'%',1];
-    c.flc(x*pixelSizeX, y*pixelSizeY, pixelSizeX, pixelSizeY);
+    c.fillRect(x*pixelSizeX, y*pixelSizeY, pixelSizeX, pixelSizeY);
 }
 
 function mod_xz(v, m) {
@@ -167,7 +167,7 @@ if (DEBUG) {
 }
 
 function loop() {
-    rqt(loop);
+    requestAnimationFrame(loop);
 
     if (DEBUG) {
         if (run==1) {
@@ -217,15 +217,13 @@ if (SOUND) {
     osc2.r=1/9;
     osc2.n=1;
 
-    a_ctx = new Ado();
-    shorten(a_ctx);
+    a_ctx = new AudioContext();
 
-    a_jsnode = a_ctx.ceS(1<<12, 0, 1);
-    shorten(a_jsnode);
-    a_jsnode.cnt(a_ctx.dsa);
+    a_jsnode = a_ctx.createScriptProcessor(1<<12, 0, 1);
+    a_jsnode.connect(a_ctx.destination);
 
     a_jsnode.onaudioprocess = function(e) {
-        var y1,n,sr=a_ctx.smR,delta,res=60/(4*120),getVoiceValue,beatlength=sr*res|0;
+        var y1,n,sr=a_ctx.sampleRate,delta,res=60/(4*120),getVoiceValue,beatlength=sr*res|0;
         var start,vtranspose;
 
         getVoiceValue = function(osc, pattern, start) {
@@ -252,9 +250,7 @@ if (SOUND) {
             return osc.v*osc.a*osc_pulse(osc.p, osc.w);
         }
 
-        shorten(e);
-        shorten(e.otB);
-        y1 = e.otB.gtn(0);
+        y1 = e.outputBuffer.getChannelData(0);
 
         for (i=0; i<y1.length; i++) {
             // current sample, absolute to start
